@@ -10,14 +10,20 @@ from schemas import Pet, Filter
 if os.getenv("ENV") != "production":
     load_dotenv()
 
-client = MongoClient(os.getenv("ATLAS_MONGODB_URI"), tlsCAFile=certifi.where())
-collection = client[os.getenv("DB")][os.getenv("COLLECTION")]
 
-vectorStore = MongoDBAtlasVectorSearch(
-    collection,
-    OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY")),
-    index_name=os.getenv("VECTOR_SEARCH_INDEX_NAME"),
-)
+def get_vector_store() -> MongoDBAtlasVectorSearch:
+    client = MongoClient(os.getenv("ATLAS_MONGODB_URI"), tlsCAFile=certifi.where())
+    collection = client[os.getenv("DB")][os.getenv("COLLECTION")]
+
+    return MongoDBAtlasVectorSearch(
+        collection,
+        OpenAIEmbeddings(api_key=os.getenv("OPENAI_API_KEY")),
+        index_name=os.getenv("VECTOR_SEARCH_INDEX_NAME"),
+    )
+
+
+# Initialize once at the module level
+vectorStore = get_vector_store()
 
 
 def search_pets(query: str, filter_obj: Optional[Filter] = None) -> List[Pet]:
@@ -26,7 +32,7 @@ def search_pets(query: str, filter_obj: Optional[Filter] = None) -> List[Pet]:
 
     Args:
         query (str): The search query.
-        filter_obj (Optional[dict]): Optional filter criteria.
+        filter_obj (Optional[Filter]): Optional filter criteria.
 
     Returns:
         List[Pet]: A list of pets matching the query and filters.
@@ -57,9 +63,3 @@ def map_to_pet(res: List[dict]) -> List[Pet]:
         Pet(**r.metadata, text=r.page_content)  # Access attributes correctly
         for r in res
     ]
-
-
-query = "sehr zurückhaltend"
-res = search_pets(query, {"type": "katze"})
-print("***")
-print(res[0])
