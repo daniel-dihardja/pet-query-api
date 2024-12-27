@@ -51,7 +51,6 @@ graph_workflow.add_node("language", language)
 graph_workflow.add_node("translate", translate)
 
 graph_workflow.add_edge(START, "language")
-
 graph_workflow.add_conditional_edges("language", should_translate)
 graph_workflow.add_edge("language", END)
 graph_workflow.add_edge("translate", END)
