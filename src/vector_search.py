@@ -1,27 +1,11 @@
 import os
-from typing_extensions import TypedDict, Optional, List
+from typing_extensions import Optional, List
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from langchain_mongodb.vectorstores import MongoDBAtlasVectorSearch
 from langchain_openai import OpenAIEmbeddings
 import certifi
-
-
-class Pet(TypedDict):
-    name: str
-    type: str
-    breed: str
-    gender: str
-    neutered: bool
-    birth_year: int
-    image: str
-    url: str
-    text: str
-
-
-class Filter(TypedDict):
-    type: str
-
+from schemas import Pet, Filter
 
 if os.getenv("ENV") != "production":
     load_dotenv()
@@ -36,7 +20,7 @@ vectorStore = MongoDBAtlasVectorSearch(
 )
 
 
-def search_pets(query: str, filter_obj: Optional[dict] = None) -> List[Pet]:
+def search_pets(query: str, filter_obj: Optional[Filter] = None) -> List[Pet]:
     """
     Search for pets based on a query and optional filter.
 
