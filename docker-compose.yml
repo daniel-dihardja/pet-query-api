@@ -1,15 +1,23 @@
-version: '3.9'
-
 services:
   fastapi-app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: fastapi-app
-    ports:
-      - "8000:8000" # Map host port 8000 to container port 8000
+    expose:
+      - "8000" # Expose FastAPI's internal port to NGINX
     env_file:
       - .env  # Reference the .env file
     volumes:
       - ./src:/app  # Mount the source code directory for development
     command: ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - "80:80"  # Expose NGINX on host's port 80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro  # Mount custom NGINX config
+    depends_on:
+      - fastapi-app  # Ensure FastAPI starts before NGINX
