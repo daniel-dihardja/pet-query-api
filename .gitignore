@@ -118,3 +118,4 @@ dmypy.json
 *.swp
 
 creds.md
+api_key_map.conf

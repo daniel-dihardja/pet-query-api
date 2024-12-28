@@ -1,0 +1,4 @@
+map $http_x_api_key $valid_api_key {
+    default 0;                        # Default to reject all keys
+    "your_secure_api_key" 1;          # Replace with your actual API key
+}
