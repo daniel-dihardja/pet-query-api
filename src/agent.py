@@ -2,31 +2,34 @@ from typing_extensions import TypedDict
 from langgraph.graph import END, START, StateGraph
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 from langgraph.graph.message import add_messages
 from prompt_templates import DETECT_LANGUAGE_PROMPT, TRANSLATE_USER_QUERY_PROMPT
+from schemas import Filter
 
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
     lang: str
     translated_message: str
+    filter: Optional[Filter]
 
 
 def create_llm():
     return ChatOpenAI(temperature=0.5, model="gpt-3.5-turbo")
 
 
-def chatbot(state: State):
+async def chatbot(state: State):
     llm = create_llm()
-    return {"messages": [llm.invoke(state["messages"])]}
+    res = await llm.ainvoke(state["messages"])
+    return {"messages": [res]}
 
 
-def language(state: State):
+async def language(state: State):
     llm = create_llm()
     prompt_template = PromptTemplate.from_template(DETECT_LANGUAGE_PROMPT)
     chain = prompt_template | llm
-    res = chain.invoke({"message": state["messages"][-1]})
+    res = await chain.ainvoke({"message": state["messages"][-1]})
     return {"lang": res.content}
 
 
@@ -37,11 +40,13 @@ def should_translate(state: State) -> Literal["translate", END]:
     return "translate"
 
 
-def translate(state: State):
+async def translate(state: State):
     llm = create_llm()
     prompt_template = PromptTemplate.from_template(TRANSLATE_USER_QUERY_PROMPT)
     chain = prompt_template | llm
-    res = chain.invoke({"message": state["messages"][-1], "lang": state["lang"]})
+    res = await chain.ainvoke(
+        {"message": state["messages"][-1].content, "lang": state["lang"]}
+    )
     return {"translated_message": res.content}
 
 

@@ -5,3 +5,5 @@ langgraph
 pymongo
 pytest
 python-dotenv
+fastapi
+uvicorn[standard]
