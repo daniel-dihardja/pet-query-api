@@ -4,6 +4,7 @@ langchain_mongodb
 langgraph
 pymongo
 pytest
+pytest-asyncio
 python-dotenv
 fastapi
 uvicorn[standard]

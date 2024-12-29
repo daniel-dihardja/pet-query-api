@@ -1,4 +1,5 @@
 from vector_search import search_pets
+import pytest
 
 
 def test_search_pets():
