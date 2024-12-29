@@ -4,7 +4,10 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from typing import Annotated, Literal, Optional
 from langgraph.graph.message import add_messages
-from prompt_templates import DETECT_LANGUAGE_PROMPT, TRANSLATE_USER_QUERY_PROMPT
+from prompt_templates import (
+    DETECT_LANGUAGE_PROMPT,
+    TRANSLATE_USER_QUERY_PROMPT,
+)
 from schemas import Filter
 
 
@@ -33,14 +36,13 @@ async def language(state: State):
     return {"lang": res.content}
 
 
-def should_translate(state: State) -> Literal["translate", END]:
-    lang = state["lang"]
-    if lang == "de":
-        return END
-    return "translate"
-
-
 async def translate(state: State):
+    # Check if the language is "de" (German)
+    if state["lang"] == "de":
+        # Return the untranslated message as it's already in the target language
+        return {"translated_message": state["messages"][-1].content}
+
+    # Otherwise, proceed with translation using the API
     llm = create_llm()
     prompt_template = PromptTemplate.from_template(TRANSLATE_USER_QUERY_PROMPT)
     chain = prompt_template | llm
@@ -56,7 +58,6 @@ graph_workflow.add_node("language", language)
 graph_workflow.add_node("translate", translate)
 
 graph_workflow.add_edge(START, "language")
-graph_workflow.add_conditional_edges("language", should_translate)
-graph_workflow.add_edge("language", END)
+graph_workflow.add_edge("language", "translate")
 graph_workflow.add_edge("translate", END)
 agent = graph_workflow.compile()
