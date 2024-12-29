@@ -19,11 +19,11 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro                # Main NGINX config
-      - ./nginx/api_key_map.conf:/etc/nginx/conf.d/api_key_map.conf:ro  # API key map
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro    # Default server config
-      - ./certbot/conf:/etc/letsencrypt                          # Certbot config
-      - ./certbot/www:/var/www/certbot                           # Certbot www
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro                
+      - ./nginx/api_key_map.conf:/etc/nginx/conf.d/api_key_map.conf:ro  
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro    
+      - ./certbot/conf:/etc/letsencrypt                          
+      - ./certbot/www:/var/www/certbot                           
     depends_on:
       - fastapi-app
 
