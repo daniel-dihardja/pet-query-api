@@ -13,5 +13,5 @@ class Pet(TypedDict):
     text: str
 
 
-class Filter(TypedDict):
+class Filter(TypedDict, total=False):
     type: str
