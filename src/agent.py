@@ -1,16 +1,18 @@
+import json
+from typing import Annotated, Optional
 from typing_extensions import TypedDict
-from langgraph.graph import END, START, StateGraph
-from langchain_openai import ChatOpenAI
+
 from langchain_core.prompts import PromptTemplate
-from typing import Annotated, Literal, Optional
+from langchain_openai import ChatOpenAI
+from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
+
 from prompt_templates import (
     DETECT_LANGUAGE_PROMPT,
-    TRANSLATE_USER_QUERY_PROMPT,
     EXTRACT_FILTER_VALUES,
+    TRANSLATE_USER_QUERY_PROMPT,
 )
 from schemas import Filter
-import json
 
 
 class State(TypedDict):
