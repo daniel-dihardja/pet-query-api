@@ -59,11 +59,7 @@ async def extract_filter_values(state: State) -> dict[str, dict[str, str | None]
     prompt_template = PromptTemplate.from_template(EXTRACT_FILTER_VALUES)
     chain = prompt_template | llm
     res = await chain.ainvoke({"message": state["translated_message"]})
-    content = res.content
-    if isinstance(content, str):
-        return {"filter": parse_json_response(content)}
-
-    return {"filter": {"type": None}}
+    return {"filter": parse_json_response(res.content)}
 
 
 def parse_json_response(response: str):
