@@ -18,3 +18,25 @@ Your task is to accurately translate the following message from {lang} to German
 
 Provide only the translated text without any additional comments or formatting.
 """
+
+
+EXTRACT_FILTER_VALUES = """
+Your task is to identify and extract filter values from the user's message and return them in a JSON format.
+
+### Filters to Extract:
+- **type**: Specifies the type of pet.
+  - Possible values: "hund" (dog), "katze" (cat).
+
+### User Message:
+<message>
+{message}
+</message>
+
+### Expected Output Format:
+Return the extracted filter values as a JSON object. If a filter value is not mentioned in the message, set its value to `null`.
+
+Example Output:
+{{
+    "type": "katze"
+}}
+"""

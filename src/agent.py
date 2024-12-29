@@ -7,8 +7,10 @@ from langgraph.graph.message import add_messages
 from prompt_templates import (
     DETECT_LANGUAGE_PROMPT,
     TRANSLATE_USER_QUERY_PROMPT,
+    EXTRACT_FILTER_VALUES,
 )
 from schemas import Filter
+import json
 
 
 class State(TypedDict):
@@ -52,12 +54,37 @@ async def translate(state: State):
     return {"translated_message": res.content}
 
 
+async def extract_filter_values(state: State) -> dict[str, dict[str, str | None]]:
+    llm = create_llm()
+    prompt_template = PromptTemplate.from_template(EXTRACT_FILTER_VALUES)
+    chain = prompt_template | llm
+    res = await chain.ainvoke({"message": state["translated_message"]})
+    if isinstance(res, str):
+        return {"filter": parse_json_response(res)}
+
+    return {"filter": {"type": None}}
+
+
+def parse_json_response(response: str):
+    """
+    Parses a JSON response string.
+    Returns the parsed JSON object if successful, otherwise a fallback value.
+    """
+    try:
+        return json.loads(response)
+    except json.JSONDecodeError:
+        return "Invalid JSON"
+
+
 graph_workflow = StateGraph(State)
 graph_workflow.add_node("chatbot", chatbot)
 graph_workflow.add_node("language", language)
 graph_workflow.add_node("translate", translate)
+graph_workflow.add_node("extract_filter_values", extract_filter_values)
 
 graph_workflow.add_edge(START, "language")
 graph_workflow.add_edge("language", "translate")
-graph_workflow.add_edge("translate", END)
+graph_workflow.add_edge("translate", "extract_filter_values")
+graph_workflow.add_edge("extract_filter_values", END)
+
 agent = graph_workflow.compile()
