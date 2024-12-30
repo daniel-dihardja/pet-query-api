@@ -5,7 +5,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import certifi
 from schemas import Pet, Filter
 import httpx
-from functools import lru_cache
 
 # Load environment variables if not in production
 if os.getenv("ENV") != "production":
