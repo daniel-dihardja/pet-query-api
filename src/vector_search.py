@@ -1,37 +1,43 @@
 import os
-from typing import Optional, List, Dict
+from typing import Optional, List
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 import certifi
 from schemas import Pet, Filter
 import httpx
+from functools import lru_cache
 
 # Load environment variables if not in production
 if os.getenv("ENV") != "production":
     load_dotenv()
 
 
-async def get_collection():
+class _CollectionManager:
     """
-    Initialize and return the MongoDB collection for vector search asynchronously.
-
-    Returns:
-        motor.motor_asyncio.AsyncIOMotorCollection: The MongoDB collection object.
+    Manages the MongoDB collection, ensuring it's initialized only once.
     """
-    client = AsyncIOMotorClient(
-        os.getenv("ATLAS_MONGODB_URI"), tlsCAFile=certifi.where()
-    )
-    db = client[os.getenv("DB")]
-    return db[os.getenv("COLLECTION")]
+
+    def __init__(self):
+        self._collection = None
+
+    async def get_collection(self):
+        """
+        Lazily initializes and returns the MongoDB collection.
+
+        Returns:
+            motor.motor_asyncio.AsyncIOMotorCollection: The MongoDB collection object.
+        """
+        if not self._collection:
+            client = AsyncIOMotorClient(
+                os.getenv("ATLAS_MONGODB_URI"), tlsCAFile=certifi.where()
+            )
+            db = client[os.getenv("DB")]
+            self._collection = db[os.getenv("COLLECTION")]
+        return self._collection
 
 
-# Initialize the collection at the module level
-collection = None
-
-
-async def initialize_collection():
-    global collection
-    collection = await get_collection()
+# Singleton instance of the CollectionManager
+_collection_manager = _CollectionManager()
 
 
 async def search_pets(query: str, filter_obj: Optional[Filter] = None) -> List[Pet]:
@@ -45,6 +51,7 @@ async def search_pets(query: str, filter_obj: Optional[Filter] = None) -> List[P
     Returns:
         List[Pet]: A list of pets matching the query and filters.
     """
+    collection = await _collection_manager.get_collection()
     query_embedding = await get_gpt_embeddings(query)
 
     # Build the vector search pipeline
@@ -80,29 +87,15 @@ async def search_pets(query: str, filter_obj: Optional[Filter] = None) -> List[P
     cursor = collection.aggregate(pipeline)
     results = [doc async for doc in cursor]
 
-    # Map raw results to Pet objects
     return results
 
 
-def get_project_stage(schema):
-    """
-    Generate a $project stage for MongoDB based on the attributes of the schema.
-
-    Args:
-        schema: The schema class (e.g., Pet).
-
-    Returns:
-        dict: A dictionary representing the $project stage.
-    """
-    return {field: 1 for field in schema.__annotations__.keys() if field != "_id"}
-
-
-async def get_gpt_embeddings(texts):
+async def get_gpt_embeddings(text: str) -> List[float]:
     """
     Generate embeddings asynchronously using OpenAI API.
 
     Args:
-        texts (str): The text input for embedding.
+        text (str): The text input for embedding.
 
     Returns:
         List[float]: The embedding vector.
@@ -114,14 +107,8 @@ async def get_gpt_embeddings(texts):
     async with httpx.AsyncClient() as client:
         response = await client.post(
             url,
-            json={"model": "text-embedding-ada-002", "input": texts},
+            json={"model": "text-embedding-ada-002", "input": text},
             headers=headers,
         )
         response.raise_for_status()  # Raise an error for failed requests
         return response.json()["data"][0]["embedding"]
-
-
-# Initialize the collection on module load
-import asyncio
-
-asyncio.run(initialize_collection())
