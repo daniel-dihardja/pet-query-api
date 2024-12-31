@@ -10,7 +10,7 @@ from vector_search import PetVectorSearch
 
 from prompt_templates import (
     DETECT_LANGUAGE_PROMPT,
-    EXTRACT_FILTER_VALUES,
+    EXTRACT_FILTER_VALUES_PROMPT,
     TRANSLATE_USER_QUERY_PROMPT,
 )
 from schemas import Filter, Pet
@@ -60,7 +60,7 @@ async def translate(state: State):
 
 async def extract_filter_values(state: State) -> dict[str, dict[str, str | None]]:
     llm = create_llm()
-    prompt_template = PromptTemplate.from_template(EXTRACT_FILTER_VALUES)
+    prompt_template = PromptTemplate.from_template(EXTRACT_FILTER_VALUES_PROMPT)
     chain = prompt_template | llm
     res = await chain.ainvoke({"message": state["translated_message"]})
     return {"filter": parse_json_response(res.content)}

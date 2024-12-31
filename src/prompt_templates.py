@@ -20,7 +20,7 @@ Provide only the translated text without any additional comments or formatting.
 """
 
 
-EXTRACT_FILTER_VALUES = """
+EXTRACT_FILTER_VALUES_PROMPT = """
 Your task is to identify and extract filter values from the user's message and return them in a JSON format.
 
 ### Filters to Extract:
