@@ -40,3 +40,17 @@ Example Output:
     "type": "katze"
 }}
 """
+
+COMPOSE_ANSWER_PROMPT = """
+Your task is to compose a response to the user's query using the provided information about available pets.
+The response must be in the language specified by the language code "{lang}".
+Make sure the answer is clear, relevant, and helpful.
+
+User Query:
+{message}
+
+Available Pets (JSON format):
+{pets}
+
+Provide a concise and helpful answer in {lang}.
+"""

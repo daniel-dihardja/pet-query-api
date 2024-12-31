@@ -8,10 +8,12 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from vector_search import PetVectorSearch
 
+
 from prompt_templates import (
     DETECT_LANGUAGE_PROMPT,
     EXTRACT_FILTER_VALUES_PROMPT,
     TRANSLATE_USER_QUERY_PROMPT,
+    COMPOSE_ANSWER_PROMPT,
 )
 from schemas import Filter, Pet
 
@@ -85,17 +87,38 @@ async def vector_query(state: State):
     return {"pets": pets}
 
 
+async def compose_answer(state: State):
+    # Extract necessary fields from the state
+    lang = state["lang"]
+    pets = state["pets"]
+    message = state["messages"][
+        -1
+    ].content  # User query message in the original language
+
+    # Create the LLM and prompt template
+    llm = create_llm()
+    prompt_template = PromptTemplate.from_template(COMPOSE_ANSWER_PROMPT)
+    chain = prompt_template | llm
+
+    # Generate the answer using the AI
+    answer = await chain.ainvoke({"lang": lang, "message": message, "pets": pets})
+
+    return {"answer": answer.content.strip()}
+
+
 graph_workflow = StateGraph(State)
 graph_workflow.add_node("chatbot", chatbot)
 graph_workflow.add_node("language", language)
 graph_workflow.add_node("translate", translate)
 graph_workflow.add_node("extract_filter_values", extract_filter_values)
 graph_workflow.add_node("vector_query", vector_query)
+graph_workflow.add_node("compose_answer", compose_answer)
 
 graph_workflow.add_edge(START, "language")
 graph_workflow.add_edge("language", "translate")
 graph_workflow.add_edge("translate", "extract_filter_values")
 graph_workflow.add_edge("extract_filter_values", "vector_query")
-graph_workflow.add_edge("vector_query", END)
+graph_workflow.add_edge("vector_query", "compose_answer")
+graph_workflow.add_edge("compose_answer", END)
 
 agent = graph_workflow.compile()
