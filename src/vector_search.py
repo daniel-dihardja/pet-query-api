@@ -5,6 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import certifi
 from schemas import Pet, Filter
 import httpx
+from openai import AsyncOpenAI
 
 # Load environment variables if not in production
 if os.getenv("ENV") != "production":
@@ -23,6 +24,7 @@ class PetVectorSearch:
         self._db_uri = os.getenv("ATLAS_MONGODB_URI")
         self._db_name = os.getenv("DB")
         self._collection_name = os.getenv("COLLECTION")
+        self._openai_client = AsyncOpenAI(api_key=self._openai_api_key)
 
     async def _get_collection(self):
         """
@@ -44,20 +46,11 @@ class PetVectorSearch:
         Returns:
             List[float]: The embedding vector.
         """
-        url = "https://api.openai.com/v1/embeddings"
-        headers = {
-            "Authorization": f"Bearer {self._openai_api_key}",
-            "Content-Type": "application/json",
-        }
+        response = await self._openai_client.embeddings.create(
+            model="text-embedding-ada-002", input=text
+        )
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                url,
-                json={"model": "text-embedding-ada-002", "input": text},
-                headers=headers,
-            )
-            response.raise_for_status()  # Raise an error for failed requests
-            return response.json()["data"][0]["embedding"]
+        return response.data[0].embedding
 
     async def search_pets(
         self, query: str, filter_obj: Optional[Filter] = None
