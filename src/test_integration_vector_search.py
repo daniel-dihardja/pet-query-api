@@ -1,18 +1,19 @@
 import pytest
-from vector_search import search_pets
+from vector_search import PetVectorSearch
 
 
 @pytest.mark.asyncio
-async def test_search_pets():
+async def test_pet_vector_search():
     """
-    Test the async search_pets function with a query and filter.
+    Test the async PetVectorSearch.search_pets function with a query and filter.
     """
     # Arrange
+    searcher = PetVectorSearch()
     query = "sehr zurückhaltend"
     filter_obj = {"type": "katze"}
 
     # Act
-    res = await search_pets(query, filter_obj)
+    res = await searcher.search_pets(query, filter_obj)
 
     # Assert
     assert res, "The result should not be empty"  # Ensure the result is not empty

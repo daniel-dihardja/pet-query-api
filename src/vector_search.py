@@ -11,103 +11,101 @@ if os.getenv("ENV") != "production":
     load_dotenv()
 
 
-class _CollectionManager:
+class PetVectorSearch:
     """
-    Manages the MongoDB collection, ensuring it's initialized only once.
+    Handles vector search for pets using MongoDB and GPT embeddings.
     """
 
     def __init__(self):
         self._collection = None
+        self._vector_search_index = os.getenv("VECTOR_SEARCH_INDEX_NAME")
+        self._openai_api_key = os.getenv("OPENAI_API_KEY")
+        self._db_uri = os.getenv("ATLAS_MONGODB_URI")
+        self._db_name = os.getenv("DB")
+        self._collection_name = os.getenv("COLLECTION")
 
-    async def get_collection(self):
+    async def _get_collection(self):
         """
         Lazily initializes and returns the MongoDB collection.
-
-        Returns:
-            motor.motor_asyncio.AsyncIOMotorCollection: The MongoDB collection object.
         """
         if not self._collection:
-            client = AsyncIOMotorClient(
-                os.getenv("ATLAS_MONGODB_URI"), tlsCAFile=certifi.where()
-            )
-            db = client[os.getenv("DB")]
-            self._collection = db[os.getenv("COLLECTION")]
+            client = AsyncIOMotorClient(self._db_uri, tlsCAFile=certifi.where())
+            db = client[self._db_name]
+            self._collection = db[self._collection_name]
         return self._collection
 
+    async def _get_gpt_embeddings(self, text: str) -> List[float]:
+        """
+        Generate embeddings asynchronously using OpenAI API.
 
-# Singleton instance of the CollectionManager
-_collection_manager = _CollectionManager()
+        Args:
+            text (str): The text input for embedding.
 
+        Returns:
+            List[float]: The embedding vector.
+        """
+        url = "https://api.openai.com/v1/embeddings"
+        headers = {
+            "Authorization": f"Bearer {self._openai_api_key}",
+            "Content-Type": "application/json",
+        }
 
-async def search_pets(query: str, filter_obj: Optional[Filter] = None) -> List[Pet]:
-    """
-    Perform a vector search for pets based on a query and optional filter asynchronously.
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                json={"model": "text-embedding-ada-002", "input": text},
+                headers=headers,
+            )
+            response.raise_for_status()  # Raise an error for failed requests
+            return response.json()["data"][0]["embedding"]
 
-    Args:
-        query (str): The search query.
-        filter_obj (Optional[Filter]): Optional filter criteria.
+    async def search_pets(
+        self, query: str, filter_obj: Optional[Filter] = None
+    ) -> List[Pet]:
+        """
+        Perform a vector search for pets based on a query and optional filter asynchronously.
 
-    Returns:
-        List[Pet]: A list of pets matching the query and filters.
-    """
-    collection = await _collection_manager.get_collection()
-    query_embedding = await get_gpt_embeddings(query)
+        Args:
+            query (str): The search query.
+            filter_obj (Optional[Filter]): Optional filter criteria.
 
-    # Build the vector search pipeline
-    pipeline = [
-        {
-            "$vectorSearch": {
-                "queryVector": query_embedding,
-                "path": "embedding",
-                "index": os.getenv("VECTOR_SEARCH_INDEX_NAME"),
-                "numCandidates": 10,  # Number of candidates to consider
-                "limit": 1,  # Set the required "limit" parameter
-                "filter": filter_obj if filter_obj else {},  # Add optional filters
-            }
-        },
-        {"$set": {"score": {"$meta": "vectorSearchScore"}}},  # Attach similarity scores
-        {
-            "$project": {
-                "_id": 0,
-                "type": 1,
-                "name": 1,
-                "breed": 1,
-                "gender": 1,
-                "neutered": 1,
-                "birth_year": 1,
-                "image": 1,
-                "url": 1,
-                "text": 1,
-            }
-        },  # Select fields
-    ]
+        Returns:
+            List[Pet]: A list of pets matching the query and filters.
+        """
+        collection = await self._get_collection()
+        query_embedding = await self._get_gpt_embeddings(query)
 
-    # Execute the aggregation pipeline asynchronously
-    cursor = collection.aggregate(pipeline)
-    results = [doc async for doc in cursor]
+        # Build the vector search pipeline
+        pipeline = [
+            {
+                "$vectorSearch": {
+                    "queryVector": query_embedding,
+                    "path": "embedding",
+                    "index": self._vector_search_index,
+                    "numCandidates": 10,
+                    "limit": 1,
+                    "filter": filter_obj if filter_obj else {},
+                }
+            },
+            {"$set": {"score": {"$meta": "vectorSearchScore"}}},
+            {
+                "$project": {
+                    "_id": 0,
+                    "type": 1,
+                    "name": 1,
+                    "breed": 1,
+                    "gender": 1,
+                    "neutered": 1,
+                    "birth_year": 1,
+                    "image": 1,
+                    "url": 1,
+                    "text": 1,
+                }
+            },
+        ]
 
-    return results
+        # Execute the aggregation pipeline asynchronously
+        cursor = collection.aggregate(pipeline)
+        results = [doc async for doc in cursor]
 
-
-async def get_gpt_embeddings(text: str) -> List[float]:
-    """
-    Generate embeddings asynchronously using OpenAI API.
-
-    Args:
-        text (str): The text input for embedding.
-
-    Returns:
-        List[float]: The embedding vector.
-    """
-    api_key = os.getenv("OPENAI_API_KEY")
-    url = "https://api.openai.com/v1/embeddings"
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url,
-            json={"model": "text-embedding-ada-002", "input": text},
-            headers=headers,
-        )
-        response.raise_for_status()  # Raise an error for failed requests
-        return response.json()["data"][0]["embedding"]
+        return results
