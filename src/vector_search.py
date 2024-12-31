@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List
+from typing import Optional, List, cast
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 import certifi
@@ -99,6 +99,6 @@ class PetVectorSearch:
 
         # Execute the aggregation pipeline asynchronously
         cursor = collection.aggregate(pipeline)
-        results = [doc async for doc in cursor]
+        results = [cast(Pet, doc) async for doc in cursor]
 
         return results
