@@ -1,11 +1,5 @@
 import pytest
-from agent import extract_filter_values
-
-
-async def call_extract_filter_values(message: str) -> dict[str, dict[str, str | None]]:
-    state = {"translated_message": message}
-    res = await extract_filter_values(state)
-    return res
+from agent import extract_filter_values, vector_query
 
 
 # Parametrized test using pytest
@@ -20,5 +14,25 @@ async def call_extract_filter_values(message: str) -> dict[str, dict[str, str | 
     ],
 )
 async def test_extract_filter_values(message, expected_filter):
-    result = await call_extract_filter_values(message)
+    state = {"translated_message": message}
+    result = await extract_filter_values(state)
     assert result == expected_filter
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "message, filter, expected_type",
+    [
+        (
+            "Ich suche nach einer katze die sehr zurückhaltend ist.",
+            {"type": "katze"},
+            "katze",
+        ),
+    ],
+)
+async def test_search_pets(message, filter, expected_type):
+    state = {"translated_message": message, "filter": filter}
+    result = await vector_query(state)
+    # print(result)
+    assert result
+    assert result["pets"][0]["type"] == expected_type

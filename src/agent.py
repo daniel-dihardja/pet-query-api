@@ -6,13 +6,14 @@ from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
+from vector_search import PetVectorSearch
 
 from prompt_templates import (
     DETECT_LANGUAGE_PROMPT,
     EXTRACT_FILTER_VALUES,
     TRANSLATE_USER_QUERY_PROMPT,
 )
-from schemas import Filter
+from schemas import Filter, Pet
 
 
 class State(TypedDict):
@@ -20,6 +21,7 @@ class State(TypedDict):
     lang: str
     translated_message: str
     filter: Optional[Filter]
+    pets: Optional[list[Pet]]
 
 
 def create_llm():
@@ -75,15 +77,25 @@ def parse_json_response(response: str):
         return "Invalid JSON"
 
 
+async def vector_query(state: State):
+    query = state["translated_message"]
+    filter_obj = state["filter"]
+    vs = PetVectorSearch()
+    pets = await vs.search_pets(query, filter_obj)
+    return {"pets": pets}
+
+
 graph_workflow = StateGraph(State)
 graph_workflow.add_node("chatbot", chatbot)
 graph_workflow.add_node("language", language)
 graph_workflow.add_node("translate", translate)
 graph_workflow.add_node("extract_filter_values", extract_filter_values)
+graph_workflow.add_node("vector_query", vector_query)
 
 graph_workflow.add_edge(START, "language")
 graph_workflow.add_edge("language", "translate")
 graph_workflow.add_edge("translate", "extract_filter_values")
-graph_workflow.add_edge("extract_filter_values", END)
+graph_workflow.add_edge("extract_filter_values", "vector_query")
+graph_workflow.add_edge("vector_query", END)
 
 agent = graph_workflow.compile()
