@@ -71,5 +71,10 @@ MOCK_MESSAGES_FOR_PROBLEMATIC_DOGS = {
         HumanMessage(
             content="I am looking for a dog that might have behavioral issues or be considered difficult to handle. I am experienced with such dogs and willing to work with them."
         )
-    ]
+    ],
+    "de": [
+        HumanMessage(
+            content="Ich suche einen Hund, der möglicherweise Verhaltensprobleme hat oder als schwierig zu handhaben gilt. Ich habe Erfahrung mit solchen Hunden und bin bereit, mit ihnen zu arbeiten."
+        )
+    ],
 }

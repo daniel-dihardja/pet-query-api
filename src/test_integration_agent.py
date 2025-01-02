@@ -69,9 +69,7 @@ async def test_compose_answer(lang):
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "lang",
-    [
-        "en",
-    ],
+    ["de", "en"],
 )
 async def test_compose_answer_for_list(lang):
     state = {
