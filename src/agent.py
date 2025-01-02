@@ -13,9 +13,9 @@ from prompt_templates import (
     DETECT_LANGUAGE_PROMPT,
     EXTRACT_FILTER_VALUES_PROMPT,
     TRANSLATE_USER_QUERY_PROMPT,
-    COMPOSE_ANSWER_PROMPT,
+    COMPOSE_RESPONSE_PROMPT,
 )
-from schemas import Filter, Pet
+from schemas import Filter, Pet, IndividualPetAnswer, ResponseType
 
 
 class State(TypedDict):
@@ -24,6 +24,7 @@ class State(TypedDict):
     translated_message: str
     filter: Optional[Filter]
     pets: Optional[list[Pet]]
+    response: ResponseType
 
 
 def create_llm():
@@ -97,13 +98,25 @@ async def compose_answer(state: State):
 
     # Create the LLM and prompt template
     llm = create_llm()
-    prompt_template = PromptTemplate.from_template(COMPOSE_ANSWER_PROMPT)
+    prompt_template = PromptTemplate.from_template(COMPOSE_RESPONSE_PROMPT)
     chain = prompt_template | llm
 
     # Generate the answer using the AI
     answer = await chain.ainvoke({"lang": lang, "message": message, "pets": pets})
 
-    return {"answer": answer.content.strip()}
+    # Parse the AI response and ensure it matches the ResponseType
+    try:
+        answer_dict = json.loads(answer.content.strip())
+        response: ResponseType = {
+            "general_answer": answer_dict.get("general_answer", ""),
+            "individual_pet_answers": [
+                {"pet_id": item["pet_id"], "answer": item["answer"]}
+                for item in answer_dict.get("individual_pet_answers", [])
+            ],
+        }
+        return response
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        raise ValueError(f"Failed to parse the AI response into ResponseType: {e}")
 
 
 graph_workflow = StateGraph(State)

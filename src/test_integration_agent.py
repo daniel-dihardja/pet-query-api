@@ -1,7 +1,12 @@
 import pytest
 from agent import extract_filter_values, vector_query, compose_answer
 from langchain_core.messages import HumanMessage
-from mock_data import MOCK_PETS, MOCK_MESSAGES
+from mock_data import (
+    MOCK_PETS,
+    MOCK_MESSAGES,
+    MOCK_MESSAGES_FOR_PROBLEMATIC_DOGS,
+    MOCK_PROBLEMATIC_DOGS,
+)
 
 
 # Parametrized test using pytest
@@ -53,6 +58,26 @@ async def test_compose_answer(lang):
         "lang": lang,
         "messages": MOCK_MESSAGES[lang],
         "pets": MOCK_PETS,
+    }
+    answer = await compose_answer(state)
+    print("===")
+    print(answer)
+    print("===")
+    assert answer
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "lang",
+    [
+        "en",
+    ],
+)
+async def test_compose_answer_for_list(lang):
+    state = {
+        "lang": lang,
+        "messages": MOCK_MESSAGES_FOR_PROBLEMATIC_DOGS[lang],
+        "pets": MOCK_PROBLEMATIC_DOGS,
     }
     answer = await compose_answer(state)
     print("===")

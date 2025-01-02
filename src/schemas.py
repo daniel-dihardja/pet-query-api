@@ -1,4 +1,4 @@
-from typing_extensions import TypedDict
+from typing_extensions import TypedDict, List
 
 
 class Pet(TypedDict):
@@ -15,3 +15,13 @@ class Pet(TypedDict):
 
 class Filter(TypedDict, total=False):
     type: str
+
+
+class IndividualPetAnswer(TypedDict):
+    pet_id: str
+    answer: str
+
+
+class ResponseType(TypedDict):
+    general_answer: str
+    individual_pet_answers: List[IndividualPetAnswer]

@@ -1,5 +1,18 @@
 from langchain.schema import HumanMessage
 
+MOCK_MESSAGES = {
+    "de": [
+        HumanMessage(
+            content="Ich suche einen Kater, der eher zurückhaltend ist und sich vielleicht erst an Menschen gewöhnen muss. Es wäre ideal, wenn er später Freigang haben könnte, da ich in einer ruhigen Gegend wohne. Ich habe Geduld und würde ihm die Zeit geben, die er braucht, um Vertrauen aufzubauen."
+        )
+    ],
+    "en": [
+        HumanMessage(
+            content="I am looking for a tomcat who is rather shy and might need some time to get used to people. It would be ideal if he could have outdoor access later, as I live in a quiet area. I am patient and would give him the time he needs to build trust."
+        )
+    ],
+}
+
 MOCK_PETS = [
     {
         "name": "Hr. Möckel",
@@ -14,15 +27,49 @@ MOCK_PETS = [
     }
 ]
 
-MOCK_MESSAGES = {
-    "de": [
-        HumanMessage(
-            content="Ich suche einen Kater, der eher zurückhaltend ist und sich vielleicht erst an Menschen gewöhnen muss. Es wäre ideal, wenn er später Freigang haben könnte, da ich in einer ruhigen Gegend wohne. Ich habe Geduld und würde ihm die Zeit geben, die er braucht, um Vertrauen aufzubauen."
-        )
-    ],
+MOCK_PROBLEMATIC_DOGS = [
+    {
+        "id": "123",
+        "name": "Sam",
+        "type": "hund",
+        "breed": "Schäferhund",
+        "gender": "male",
+        "neutered": 0,
+        "birth_year": 2020,
+        "image": "",
+        "url": "",
+        "text": "Sam wurde am 9.10.2023 als Einweisung auf der Grundlage des TierSchG zu uns ins Tierheim gebracht. Er zeigt sich oft unsicher und neigt bei Stresssituationen zu starkem Bellen und unkontrolliertem Verhalten. Mit der richtigen Führung könnte er jedoch ein treuer Begleiter werden.",
+    },
+    {
+        "id": "456",
+        "name": "Toni",
+        "type": "hund",
+        "breed": "Schäferhund-Mischling",
+        "gender": "male",
+        "neutered": 0,
+        "birth_year": 2017,
+        "image": "",
+        "url": "",
+        "text": "Toni erreichte uns über eine Sicherstellung aufgrund von TierSchG. Er hat ein dominantes Verhalten und braucht eine erfahrene Person, die ihm klare Grenzen setzen kann. Mit Geduld und Training zeigt er jedoch große Fortschritte.",
+    },
+    {
+        "id": "789",
+        "name": "Benny",
+        "type": "hund",
+        "breed": "Schäferhund-Mischling",
+        "gender": "male",
+        "neutered": 1,
+        "birth_year": 2022,
+        "image": "",
+        "url": "",
+        "text": "Benny ist ein aufgeregter und freundlicher Hund, der jedoch zu Hyperaktivität neigt. Er braucht klare Strukturen und ausreichend Bewegung, um sein überschüssiges Energielevel in den Griff zu bekommen.",
+    },
+]
+
+MOCK_MESSAGES_FOR_PROBLEMATIC_DOGS = {
     "en": [
         HumanMessage(
-            content="I am looking for a tomcat who is rather shy and might need some time to get used to people. It would be ideal if he could have outdoor access later, as I live in a quiet area. I am patient and would give him the time he needs to build trust."
+            content="I am looking for a dog that might have behavioral issues or be considered difficult to handle. I am experienced with such dogs and willing to work with them."
         )
-    ],
+    ]
 }

@@ -41,10 +41,9 @@ Example Output:
 }}
 """
 
-COMPOSE_ANSWER_PROMPT = """
-Your task is to compose a response to the user's query using the provided information about available pets.
-The response must be in the language specified by the language code "{lang}".
-Make sure the answer is clear, relevant, and helpful.
+COMPOSE_RESPONSE_PROMPT = """
+Your task is to compose a comprehensive response to the user's query based on the provided information about available pets.
+The response must be written in the language specified by the language code "{lang}" and should be clear, relevant, and helpful.
 
 User Query:
 {message}
@@ -52,5 +51,30 @@ User Query:
 Available Pets (JSON format):
 {pets}
 
-Provide a concise and helpful answer in {lang}.
+Response Format:
+1. General Answer: Provide a concise, helpful general response addressing the user's query.
+2. Individual Pet Answers: For each pet, create a specific answer tailored to the query, following this format:
+   {{
+     "pet_id": "<The ID of the pet>",
+     "answer": "<Your specific answer about the pet>"
+   }}
+
+Final Output Format (as a JSON object):
+{{
+  "general_answer": "<Your general answer here>",
+  "individual_pet_answers": [
+    {{
+      "pet_id": "<The ID of the pet>",
+      "answer": "<Your specific answer about the pet>"
+    }}
+    // Repeat for each pet
+  ]
+}}
+
+Instructions:
+- Ensure the general answer addresses the user's query broadly while being informative and concise.
+- Tailor each individual pet answer to the specific details of the pet and the context of the user's query.
+- Format the entire response strictly as a JSON object.
+
+Compose your response in {lang}.
 """
