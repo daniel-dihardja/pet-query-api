@@ -15,7 +15,7 @@ from prompt_templates import (
     TRANSLATE_USER_QUERY_PROMPT,
     COMPOSE_RESPONSE_PROMPT,
 )
-from schemas import Filter, Pet, IndividualPetAnswer, ResponseType
+from schemas import Filter, Pet, ResponseType
 
 
 class State(TypedDict):
