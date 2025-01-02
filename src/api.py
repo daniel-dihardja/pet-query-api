@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from agent import chatbot
+from agent import chatbot, agent
 
 app = FastAPI()
 
@@ -18,4 +18,10 @@ def read_root():
 @app.post("/chat")
 async def chat(request: MessageRequest):
     res = await chatbot({"messages": [request.message]})
+    return res
+
+
+@app.post("/search")
+async def search(request: MessageRequest):
+    res = await agent.ainvoke({"messages": [request.message]})
     return res
