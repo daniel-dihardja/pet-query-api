@@ -119,7 +119,7 @@ async def compose_answer(state: State):
                 for item in answer_dict.get("individual_pet_answers", [])
             ],
         }
-        return response
+        return {"response": response}
     except (json.JSONDecodeError, KeyError, TypeError) as e:
         raise ValueError(f"Failed to parse the AI response into ResponseType: {e}")
 

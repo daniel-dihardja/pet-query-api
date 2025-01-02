@@ -24,4 +24,4 @@ async def chat(request: MessageRequest):
 @app.post("/search")
 async def search(request: MessageRequest):
     res = await agent.ainvoke({"messages": [request.message]})
-    return res
+    return res["response"]

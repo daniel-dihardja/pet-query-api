@@ -76,7 +76,7 @@ class PetVectorSearch:
                     "path": "embedding",
                     "index": self._vector_search_index,
                     "numCandidates": 10,
-                    "limit": 1,
+                    "limit": 3,
                     "filter": filter_obj if filter_obj else {},
                 }
             },
