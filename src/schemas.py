@@ -19,6 +19,8 @@ class Filter(TypedDict, total=False):
 
 class IndividualPetAnswer(TypedDict):
     pet_id: str
+    image: str
+    url: str
     answer: str
 
 

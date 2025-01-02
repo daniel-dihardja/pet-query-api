@@ -36,8 +36,8 @@ MOCK_PROBLEMATIC_DOGS = [
         "gender": "male",
         "neutered": 0,
         "birth_year": 2020,
-        "image": "",
-        "url": "",
+        "image": "https://www.tierheim-leipzig.de/wp-content/uploads/2024/10/sam.jpg",
+        "url": "https://www.tierheim-leipzig.de/Project/sam-2/",
         "text": "Sam wurde am 9.10.2023 als Einweisung auf der Grundlage des TierSchG zu uns ins Tierheim gebracht. Er zeigt sich oft unsicher und neigt bei Stresssituationen zu starkem Bellen und unkontrolliertem Verhalten. Mit der richtigen Führung könnte er jedoch ein treuer Begleiter werden.",
     },
     {
@@ -48,8 +48,8 @@ MOCK_PROBLEMATIC_DOGS = [
         "gender": "male",
         "neutered": 0,
         "birth_year": 2017,
-        "image": "",
-        "url": "",
+        "image": "https://www.tierheim-leipzig.de/wp-content/uploads/2024/10/toni.jpg",
+        "url": "https://www.tierheim-leipzig.de/Project/toni/",
         "text": "Toni erreichte uns über eine Sicherstellung aufgrund von TierSchG. Er hat ein dominantes Verhalten und braucht eine erfahrene Person, die ihm klare Grenzen setzen kann. Mit Geduld und Training zeigt er jedoch große Fortschritte.",
     },
     {
@@ -60,8 +60,8 @@ MOCK_PROBLEMATIC_DOGS = [
         "gender": "male",
         "neutered": 1,
         "birth_year": 2022,
-        "image": "",
-        "url": "",
+        "image": "https://www.tierheim-leipzig.de/wp-content/uploads/2024/10/benny.jpg",
+        "url": "https://www.tierheim-leipzig.de/Project/benny/",
         "text": "Benny ist ein aufgeregter und freundlicher Hund, der jedoch zu Hyperaktivität neigt. Er braucht klare Strukturen und ausreichend Bewegung, um sein überschüssiges Energielevel in den Griff zu bekommen.",
     },
 ]

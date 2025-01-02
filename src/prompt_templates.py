@@ -56,6 +56,8 @@ Response Format:
 2. Individual Pet Answers: For each pet, create a specific answer tailored to the query, following this format:
    {{
      "pet_id": "<The ID of the pet>",
+     "image": "<URL of the pet's image>",
+     "url": "<URL of the pet's profile>",
      "answer": "<Your specific answer about the pet>"
    }}
 
@@ -65,6 +67,8 @@ Final Output Format (as a JSON object):
   "individual_pet_answers": [
     {{
       "pet_id": "<The ID of the pet>",
+      "image": "<URL of the pet's image>",
+      "url": "<URL of the pet's profile>",
       "answer": "<Your specific answer about the pet>"
     }}
     // Repeat for each pet

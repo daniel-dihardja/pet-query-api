@@ -110,7 +110,12 @@ async def compose_answer(state: State):
         response: ResponseType = {
             "general_answer": answer_dict.get("general_answer", ""),
             "individual_pet_answers": [
-                {"pet_id": item["pet_id"], "answer": item["answer"]}
+                {
+                    "pet_id": item["pet_id"],
+                    "image": item["image"],
+                    "url": item["url"],
+                    "answer": item["answer"],
+                }
                 for item in answer_dict.get("individual_pet_answers", [])
             ],
         }
