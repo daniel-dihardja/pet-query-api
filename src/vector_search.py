@@ -83,7 +83,7 @@ class PetVectorSearch:
             {"$set": {"score": {"$meta": "vectorSearchScore"}}},
             {
                 "$project": {
-                    "_id": 0,
+                    "id": {"$toString": "$_id"},
                     "type": 1,
                     "name": 1,
                     "breed": 1,
